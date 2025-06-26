@@ -1,0 +1,69 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId> <!-- Replace with your group ID -->
+    <artifactId>Deploy</artifactId> <!-- Replace with your artifact ID -->
+    <version>1.0</version>
+    <packaging>war</packaging> <!-- Specifies that this project will be packaged as a WAR file -->
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source> <!-- Java version -->
+        <maven.compiler.target>1.8</maven.compiler.target> <!-- Target Java version -->
+    </properties>
+
+    <dependencies>
+        <!-- Servlet API dependency -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope> <!-- This is provided by the servlet container -->
+        </dependency>
+
+        <!-- JSTL (JavaServer Pages Standard Tag Library) dependency -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
+        
+        <!-- JSTL Implementation -->
+        <dependency>
+            <groupId>org.apache.taglibs</groupId>
+            <artifactId>taglibs-standard-impl</artifactId>
+            <version>1.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.taglibs</groupId>
+            <artifactId>taglibs-standard-spec</artifactId>
+            <version>1.2.5</version>
+        </dependency>
+
+        <!-- Additional dependencies can be added here -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <warSourceDirectory>src/main/webapp</warSourceDirectory> <!-- Location of your web resources -->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

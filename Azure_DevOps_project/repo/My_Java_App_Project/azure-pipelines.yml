@@ -1,0 +1,72 @@
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  imageName: 'my-java-app'
+  acrLoginServer: 'mygreensappacr.azurecr.io'
+  dockerRegistryServiceConnection: 'ACR-Service-Connection'
+  azureServiceConnection: 'AzureRM-AKS-Connection'
+  kubernetesServiceConnection: 'AKS-K8S-Connection'
+  aksCluster: 'mygreensappaks'
+  aksResourceGroup: 'MyGreensApp-RG'
+  namespace: 'default'
+
+steps:
+
+# Step 1: Checkout code
+- checkout: self
+
+# Step 2: Build the WAR file using Maven
+- task: Maven@3
+  displayName: 'Build WAR with Maven'
+  inputs:
+    mavenPomFile: 'pom.xml'
+    goals: 'package'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.11'
+    mavenVersionOption: 'Default'
+
+# Step 3: Build and push Docker image to ACR
+- task: Docker@2
+  displayName: 'Build and Push Docker Image'
+  inputs:
+    containerRegistry: $(dockerRegistryServiceConnection)
+    repository: $(imageName)
+    command: buildAndPush
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      $(Build.BuildId)
+
+# Step 4: Set AKS context using Azure CLI
+- task: AzureCLI@2
+  displayName: 'Set AKS context'
+  inputs:
+    azureSubscription: $(azureServiceConnection)
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksCluster)
+
+# Step 5: Deploy Kubernetes manifests to AKS
+- task: KubernetesManifest@0
+  displayName: 'Deploy to AKS'
+  inputs:
+    action: deploy
+    kubernetesServiceConnection: $(kubernetesServiceConnection)
+    namespace: $(namespace)
+    manifests: |
+      k8s/deployment.yaml
+      k8s/service.yaml
+    containers: |
+      $(acrLoginServer)/$(imageName):$(Build.BuildId)
+# Step 6: Verify deployment
+# Step 6: Verify deployment
+- task: Kubernetes@1
+  displayName: 'Verify Deployment'
+  inputs:
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: get
+    arguments: 'pods -n $(namespace) -o json'
